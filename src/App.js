@@ -1,30 +1,36 @@
-import React, { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import React, { useState, useRef, Suspense } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF } from '@react-three/drei';
 
-const Shoe = ({ colors }) => {
+const Model = ({ url, colors, setColors }) => {
+  const group = useRef();
+  const { nodes, materials } = useGLTF(url);
+
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    group.current.rotation.y = Math.sin(t / 2) / 8;
+    group.current.position.y = (1 + Math.sin(t / 1.5)) / 50;
+  });
+
   return (
-    <group>
-      {/* Sole */}
-      <mesh position={[0, -0.1, 0]}>
-        <boxGeometry args={[1.5, 0.2, 3]} />
-        <meshStandardMaterial color={colors.sole} />
-      </mesh>
-      {/* Upper */}
-      <mesh position={[0, 0.3, 0]}>
-        <boxGeometry args={[1.4, 0.6, 2.8]} />
-        <meshStandardMaterial color={colors.upper} />
-      </mesh>
-      {/* Laces */}
-      <mesh position={[0, 0.6, 0]}>
-        <boxGeometry args={[1, 0.1, 2]} />
-        <meshStandardMaterial color={colors.laces} />
-      </mesh>
-      {/* Stripe */}
-      <mesh position={[0.7, 0.3, 0]}>
-        <boxGeometry args={[0.1, 0.6, 2.8]} />
-        <meshStandardMaterial color={colors.stripe} />
-      </mesh>
+    <group ref={group} dispose={null}>
+      {Object.entries(nodes).map(([nodeName, node]) => {
+        if (node.isMesh) {
+          return (
+            <mesh 
+              key={nodeName} 
+              geometry={node.geometry} 
+              material={materials[node.material.name]}
+              material-color={colors[nodeName] || '#ffffff'}
+              onClick={() => {
+                const randomColor = Math.floor(Math.random()*16777215).toString(16);
+                setColors(prev => ({ ...prev, [nodeName]: '#' + randomColor }));
+              }}
+            />
+          );
+        }
+        return null;
+      })}
     </group>
   );
 };
@@ -41,38 +47,48 @@ const ColorPicker = ({ label, color, onChange }) => (
   </div>
 );
 
-const ShoeCustomizer = () => {
-  const [colors, setColors] = useState({
-    sole: '#ffffff',
-    upper: '#ff0000',
-    laces: '#00ff00',
-    stripe: '#0000ff'
-  });
+const ModelCustomizer = () => {
+  const [modelUrl, setModelUrl] = useState('');
+  const [colors, setColors] = useState({});
 
-  const handleColorChange = (part, color) => {
-    setColors(prevColors => ({ ...prevColors, [part]: color }));
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setModelUrl(url);
+      setColors({}); // Reset colors when new model is loaded
+    }
   };
 
   return (
     <div className="h-screen w-full flex flex-col">
+      <div className="p-4 bg-gray-100">
+        <input type="file" accept=".gltf,.glb" onChange={handleFileChange} className="mb-4" />
+      </div>
       <div className="flex-grow">
-        <Canvas camera={{ position: [0, 1, 5] }}>
+        <Canvas camera={{ position: [0, 0, 2.5] }}>
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-          <Shoe colors={colors} />
+          <Suspense fallback={null}>
+            {modelUrl && <Model url={modelUrl} colors={colors} setColors={setColors} />}
+          </Suspense>
           <OrbitControls />
         </Canvas>
       </div>
       <div className="p-4 bg-gray-100">
         <div className="grid grid-cols-2 gap-4">
-          <ColorPicker label="Sole Color" color={colors.sole} onChange={(color) => handleColorChange('sole', color)} />
-          <ColorPicker label="Upper Color" color={colors.upper} onChange={(color) => handleColorChange('upper', color)} />
-          <ColorPicker label="Laces Color" color={colors.laces} onChange={(color) => handleColorChange('laces', color)} />
-          <ColorPicker label="Stripe Color" color={colors.stripe} onChange={(color) => handleColorChange('stripe', color)} />
+          {Object.entries(colors).map(([part, color]) => (
+            <ColorPicker 
+              key={part}
+              label={`${part} Color`}
+              color={color}
+              onChange={(newColor) => setColors(prev => ({ ...prev, [part]: newColor }))}
+            />
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-export default ShoeCustomizer;
+export default ModelCustomizer;
