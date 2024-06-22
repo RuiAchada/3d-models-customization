@@ -1,10 +1,42 @@
-import React, { useState, useRef, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import React, { useState, useRef, Suspense, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
+import * as THREE from 'three';
 
 const Model = ({ url, colors, setColors }) => {
   const group = useRef();
-  const { nodes, materials } = useGLTF(url);
+  const { scene } = useGLTF(url);
+  const { invalidate } = useThree();
+
+  useEffect(() => {
+    const newColors = {};
+    scene.traverse((object) => {
+      if (object.isMesh) {
+        const key = object.name || object.uuid;
+        if (object.material.color) {
+          newColors[key] = '#' + object.material.color.getHexString();
+        }
+      }
+    });
+    setColors(newColors);
+  }, [scene, setColors]);
+
+  useEffect(() => {
+    scene.traverse((object) => {
+      if (object.isMesh) {
+        const key = object.name || object.uuid;
+        if (colors[key]) {
+          if (object.material.color) {
+            object.material.color.set(colors[key]);
+          } else {
+            object.material = new THREE.MeshStandardMaterial({ color: colors[key] });
+          }
+          object.material.needsUpdate = true;
+        }
+      }
+    });
+    invalidate();
+  }, [scene, colors, invalidate]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
@@ -14,23 +46,7 @@ const Model = ({ url, colors, setColors }) => {
 
   return (
     <group ref={group} dispose={null}>
-      {Object.entries(nodes).map(([nodeName, node]) => {
-        if (node.isMesh) {
-          return (
-            <mesh 
-              key={nodeName} 
-              geometry={node.geometry} 
-              material={materials[node.material.name]}
-              material-color={colors[nodeName] || '#ffffff'}
-              onClick={() => {
-                const randomColor = Math.floor(Math.random()*16777215).toString(16);
-                setColors(prev => ({ ...prev, [nodeName]: '#' + randomColor }));
-              }}
-            />
-          );
-        }
-        return null;
-      })}
+      <primitive object={scene} />
     </group>
   );
 };
@@ -60,6 +76,10 @@ const ModelCustomizer = () => {
     }
   };
 
+  const handleColorChange = (part, newColor) => {
+    setColors(prev => ({ ...prev, [part]: newColor }));
+  };
+
   return (
     <div className="h-screen w-full flex flex-col">
       <div className="p-4 bg-gray-100">
@@ -75,14 +95,14 @@ const ModelCustomizer = () => {
           <OrbitControls />
         </Canvas>
       </div>
-      <div className="p-4 bg-gray-100">
+      <div className="p-4 bg-gray-100 overflow-auto" style={{maxHeight: '30vh'}}>
         <div className="grid grid-cols-2 gap-4">
           {Object.entries(colors).map(([part, color]) => (
             <ColorPicker 
               key={part}
-              label={`${part} Color`}
+              label={part}
               color={color}
-              onChange={(newColor) => setColors(prev => ({ ...prev, [part]: newColor }))}
+              onChange={(newColor) => handleColorChange(part, newColor)}
             />
           ))}
         </div>
