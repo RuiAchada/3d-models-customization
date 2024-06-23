@@ -1,70 +1,37 @@
-# Getting Started with Create React App
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
 
 ### `npm start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+# Project Summary
 
-### `npm test`
+The purpose of this project was to replicate the functionality found in several online shops, allowing users to customize their own shoes in a 3D model.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Libraries Used:
 
-### `npm run build`
+- React: The core library used for building the user interface.
+- Three.js: The foundational 3D graphics library for JavaScript.
+- @react-three/fiber: A React renderer for Three.js, facilitating the creation of 3D graphics with a React-like API.
+- @react-three/drei: A collection of useful helpers and abstractions for react-three-fiber.
+- Tailwind CSS: Utilized for styling the UI components (Note: Tailwind classes must be explicitly set up to take effect).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Project notes:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Dynamic Model Loading: The application can load any GLTF or GLB file uploaded by the user.
+- Color Customization: Each mesh in the loaded 3D model has its own color picker, allowing for granular customization.
+- Real-time Updates: Color changes are applied to the 3D model in real-time.
+- Unique Identifiers: Each mesh is identified by its name or UUID, avoiding conflicts in models with similarly named parts.
+- Initial Color Preservation: The original colors of the model are captured and used as initial values for the color pickers.
+- Responsive Design: The UI is designed to be responsive, with a scrollable color picker area for models with many parts.
+- Model Animation: A simple animation is applied to the model to rotate it slightly, enhancing the visual experience.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Potential Future Improvements:
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Texture Customization: Add the ability to change textures in addition to colors.
+- Export Functionality: Enable users to export their customized models.
+- Undo/Redo Functionality: Implement a history system for color changes.
+- More Advanced Animations: Add options for different model animations or poses.
+- Multiple Model Support: Allow loading and customization of multiple models simultaneously.
+- Performance Optimizations: Implement level-of-detail (LOD) for complex models to improve performance.
